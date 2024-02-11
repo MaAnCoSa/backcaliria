@@ -28,17 +28,15 @@ app.get('/rtsol', (req, res) => {
 app.post('/rtsol', (req, res) => {
     const { sol } = req.body;
 
-    if (!sol) {
-        res.status(418).send({ message: 'No new solution sent!' })
-    }
-
-    console.log(sol)
-
     digit1 = sol.digit1
     digit2 = sol.digit2
     digit3 = sol.digit3
     digit4 = sol.digit4
     digit5 = sol.digit5
+
+    if (!sol.digit1 || !sol.digit2 || !sol.digit3 || !sol.digit4 || !sol.digit5) {
+        res.status(418).send({ message: 'No new solution sent!' })
+    }
 
     res.send({
         newsol: `message received: ${digit1}${digit2}${digit3}${digit4}${digit5}`
