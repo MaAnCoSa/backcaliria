@@ -1,14 +1,18 @@
-const cors = require('cors')
-const express = require("express");
+import cors from 'cors'
+import express from "express"
 const app = express();
-const PORT = 8080;
-const AWS = require('aws-sdk')
-const { getStates, getStateById, addOrUpdateState, deleteStateById } = require('./dynamo.js')
+import pg from 'pg'
+import dotenv from 'dotenv'
+dotenv.config()
 
-
-
-
-
+const db = new pg.Pool({
+    host: process.env.POSTGRES_HOST,
+    port: process.env.PORT,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE,
+    connectionString: process.env.POSTGRES_URL ,
+})
 
 app.use( express.json() )
 
@@ -24,8 +28,16 @@ const options = [
 app.use(options)
 
 app.listen(
-    PORT,
-    () => console.log(`ALIVEEE on http://localhost:${PORT}`)
+    process.env.PORT,
+    () => {
+        console.log(`ALIVEEE on http://localhost:${process.env.PORT}`)
+        console.log(`host: ${process.env.POSTGRES_HOST}`)
+        console.log(`port: ${process.env.PORT}`)
+        console.log(`user: ${process.env.POSTGRES_USER}`)
+        console.log(`password: ${process.env.POSTGRES_PASSWORD}`)
+        console.log(`database: ${process.env.POSTGRES_DATABASE}`)
+        console.log(`connectionString: ${process.env.POSTGRES_URL}`)
+    }
 )
 
 let digit1 = 1;
@@ -35,21 +47,19 @@ let digit4 = 1;
 let digit5 = 1;
 
 app.get('/rtsol', async (req, res) => {
-    const response = await getStateById("rt")
-    const item = response.Item
-    res.status(200).send({
-        id: item.id,
-        digit1: item.digit1,
-        digit2: item.digit2,
-        digit3: item.digit3,
-        digit4: item.digit4,
-        digit5: item.digit5,
-        clave: item.clave,
-        message: item.message
-    })
+    const client = await db.connect();
+
+    console.log("pre sql")
+    const result = await client.query("SELECT * FROM states WHERE id='rt'");
+    client.release()
+
+    const state = JSON.parse(result.rows[0].state)
+    console.log(state)
+
+    res.status(200).json(state)
 });
 
-app.post('/rtsol', (req, res) => {
+app.post('/rtsol', async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -59,22 +69,21 @@ app.post('/rtsol', (req, res) => {
       )
     const { sol } = req.body;
 
-    const newState = {
-        "id": "rt",
-        "digit1": sol.digit1,
-        "digit2": sol.digit2,
-        "digit3": sol.digit3,
-        "digit4": sol.digit4,
-        "digit5": sol.digit5,
-        "clave": sol.clave,
-        "message": sol.message
-    }
+    const d1 = sol.digit1
+    const d2 = sol.digit2
+    const d3 = sol.digit3
+    const d4 = sol.digit4
+    const d5 = sol.digit5
+    const clave = sol.clave
+    const message = sol.message
 
-    addOrUpdateState(newState);
+    const strState = `{"digit1": ${d1}, "digit2": ${d2}, "digit3": ${d3}, "digit4": ${d4}, "digit5": ${d5}, "clave": "${clave}", "message": "${message}"}`
+    const query = `UPDATE states SET state='${strState}' WHERE id='rt'`
 
-    res.send({
-        newCombination: `${sol.digit1}${sol.digit2}${sol.digit3}${sol.digit4}${sol.digit5}`,
-        newClave: `${sol.clave}`,
-        newMessage: `${sol.message}`
-    })
+    console.log(query)
+
+    const client = await db.connect()
+    const result = await client.query(query);
+    client.release()
+    res.status(200).json(result)
 })
