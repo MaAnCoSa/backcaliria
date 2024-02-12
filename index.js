@@ -2,6 +2,13 @@ const cors = require('cors')
 const express = require("express");
 const app = express();
 const PORT = 8080;
+const AWS = require('aws-sdk')
+const { getStates, getStateById, addOrUpdateState, deleteStateById } = require('./dynamo.js')
+
+
+
+
+
 
 app.use( express.json() )
 
@@ -27,13 +34,18 @@ let digit3 = 1;
 let digit4 = 1;
 let digit5 = 1;
 
-app.get('/rtsol', (req, res) => {
+app.get('/rtsol', async (req, res) => {
+    const response = await getStateById("rt")
+    const item = response.Item
     res.status(200).send({
-        digit1: digit1,
-        digit2: digit2,
-        digit3: digit3,
-        digit4: digit4,
-        digit5: digit5
+        id: item.id,
+        digit1: item.digit1,
+        digit2: item.digit2,
+        digit3: item.digit3,
+        digit4: item.digit4,
+        digit5: item.digit5,
+        clave: item.clave,
+        message: item.message
     })
 });
 
@@ -47,17 +59,22 @@ app.post('/rtsol', (req, res) => {
       )
     const { sol } = req.body;
 
-    digit1 = sol.digit1
-    digit2 = sol.digit2
-    digit3 = sol.digit3
-    digit4 = sol.digit4
-    digit5 = sol.digit5
-
-    if (!digit1 || !digit2 || !digit3 || !digit4 || !digit5) {
-        res.status(418).send({ message: 'No new solution sent!' })
+    const newState = {
+        "id": "rt",
+        "digit1": sol.digit1,
+        "digit2": sol.digit2,
+        "digit3": sol.digit3,
+        "digit4": sol.digit4,
+        "digit5": sol.digit5,
+        "clave": sol.clave,
+        "message": sol.message
     }
 
+    addOrUpdateState(newState);
+
     res.send({
-        newsol: `message received: ${digit1}${digit2}${digit3}${digit4}${digit5}`
+        newCombination: `${sol.digit1}${sol.digit2}${sol.digit3}${sol.digit4}${sol.digit5}`,
+        newClave: `${sol.clave}`,
+        newMessage: `${sol.message}`
     })
 })
