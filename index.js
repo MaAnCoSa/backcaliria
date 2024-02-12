@@ -1,8 +1,21 @@
+import cors from 'cors'
+
 const express = require("express");
 const app = express();
 const PORT = 8080;
 
 app.use( express.json() )
+
+const options = [
+    cors({
+        origin: '*',
+        methods: '*',
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    })
+];
+
+app.use(options)
 
 app.listen(
     PORT,
