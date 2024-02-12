@@ -54,7 +54,7 @@ app.post('/rtsol', (req, res) => {
     digit4 = sol.digit4
     digit5 = sol.digit5
 
-    if (!sol.digit1 || !sol.digit2 || !sol.digit3 || !sol.digit4 || !sol.digit5) {
+    if (!digit1 || !digit2 || !digit3 || !digit4 || !digit5) {
         res.status(418).send({ message: 'No new solution sent!' })
     }
 
