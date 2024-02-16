@@ -77,17 +77,7 @@ app.post('/rtsol', async (req, res) => {
     const clave = sol.clave
     const message = sol.message
 
-    const strState = ```
-        {
-            "digit1": ${d1},
-            "digit2": ${d2},
-            "digit3": ${d3},
-            "digit4": ${d4},
-            "digit5": ${d5},
-            "clave": "${clave}",
-            "message": "${message}"
-        }
-    ```
+    const strState = `{"digit1": ${d1}, "digit2": ${d2}, "digit3": ${d3}, "digit4": ${d4}, "digit5": ${d5}, "clave": "${clave}", "message": "${message}"}`
     const query = `UPDATE states SET state='${strState}' WHERE id='rt'`
 
     console.log(query)
