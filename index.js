@@ -58,10 +58,11 @@ let digit5 = 1;
     res.status(200).json(state)
 }); */
 
-app.get('/rtsol', async (req, res) => {
+app.get('/rtsol/:table_id', async (req, res) => {
+    const { table_id } = req.params
     const client = await db.connect();
 
-    const result = await client.query("SELECT comb FROM royal_tablet WHERE table_id='Mataogros'");
+    const result = await client.query(`SELECT comb FROM royal_tablet WHERE table_id='${table_id}'`);
     client.release()
 
     const state = JSON.parse(result.rows[0].comb)
