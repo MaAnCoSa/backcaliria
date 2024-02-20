@@ -136,11 +136,7 @@ app.post('/rtsol', async (req, res) => {
 app.post('/rtlogin', async (req, res) => {
     const client = await db.connect();
 
-    console.log(req.body)
     const { table_name, table_password } = req.body
-    console.log(table_name)
-    console.log(table_password)
-
 
     const result = await client.query(`SELECT table_id FROM royal_tablet WHERE table_name='${table_name}' AND table_password='${table_password}'`);
     const state = result.rows[0]
@@ -150,6 +146,28 @@ app.post('/rtlogin', async (req, res) => {
         res.status(200).json({
             auth: true,
             table_id: table_id
+        })
+    } else {
+        res.status(400).json({
+            auth: false
+        })
+    }
+    client.release()
+});
+
+app.post('/rtlogin-user', async (req, res) => {
+    const client = await db.connect();
+
+    const { table_name } = req.body
+
+    const result = await client.query(`SELECT comb FROM royal_tablet WHERE table_name='${table_name}'`);
+    const state = result.rows[0]
+
+    if (result.rows.length != 0) {
+        const table_id = state.table_id
+        res.status(200).json({
+            auth: true,
+            comb: comb
         })
     } else {
         res.status(400).json({
