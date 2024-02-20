@@ -160,11 +160,11 @@ app.post('/rtlogin-user', async (req, res) => {
 
     const { table_name } = req.body
 
-    const result = await client.query(`SELECT rt.comb FROM royal_tablet rt WHERE table_name='${table_name}'`);
+    const result = await client.query(`SELECT comb FROM royal_tablet WHERE table_name='${table_name}'`);
     const state = result.rows[0]
 
     if (result.rows.length != 0) {
-        const table_id = state.table_id
+        const comb = state.comb
         res.status(200).json({
             auth: true,
             comb: comb
