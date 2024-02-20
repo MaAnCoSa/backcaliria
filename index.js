@@ -137,23 +137,24 @@ app.post('/rtlogin', async (req, res) => {
     const client = await db.connect();
 
     console.log(req.body)
-    const { table_id, table_password } = req.body
-    console.log(table_id)
+    const { table_name, table_password } = req.body
+    console.log(table_name)
     console.log(table_password)
 
 
-    const result = await client.query(`SELECT table_id, table_password FROM royal_tablet WHERE table_id='${table_id}' AND table_password='${table_password}'`);
-    client.release()
-
+    const result = await client.query(`SELECT table_id FROM royal_tablet WHERE table_name='${table_name}' AND table_password='${table_password}'`);
     const state = result.rows[0]
 
     if (result.rows.length != 0) {
+        const table_id = state.table_id
         res.status(200).json({
-            auth: true
+            auth: true,
+            table_id: table_id
         })
     } else {
         res.status(400).json({
             auth: false
         })
     }
+    client.release()
 });
