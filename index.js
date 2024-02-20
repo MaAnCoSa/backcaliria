@@ -46,10 +46,9 @@ let digit3 = 1;
 let digit4 = 1;
 let digit5 = 1;
 
-app.get('/rtsol', async (req, res) => {
+/* app.get('/rtsol', async (req, res) => {
     const client = await db.connect();
 
-    console.log("pre sql")
     const result = await client.query("SELECT * FROM states WHERE id='rt'");
     client.release()
 
@@ -57,9 +56,21 @@ app.get('/rtsol', async (req, res) => {
     console.log(state)
 
     res.status(200).json(state)
+}); */
+
+app.get('/rtsol', async (req, res) => {
+    const client = await db.connect();
+
+    const result = await client.query("SELECT comb FROM royal_tablet WHERE table_id='Mataogros'");
+    client.release()
+
+    const state = JSON.parse(result.rows[0].comb)
+    console.log(state)
+
+    res.status(200).json(state)
 });
 
-app.post('/rtsol', async (req, res) => {
+/* app.post('/rtsol', async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -86,4 +97,62 @@ app.post('/rtsol', async (req, res) => {
     const result = await client.query(query);
     client.release()
     res.status(200).json(result)
+}) */
+
+app.post('/rtsol', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true)
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+      )
+    const { sol } = req.body;
+
+    const d1 = sol.d1
+    const d2 = sol.d2
+    const d3 = sol.d3
+    const d4 = sol.d4
+    const d5 = sol.d5
+    const clave = sol.code
+    const message = sol.msg
+    const table_id = sol.table_id
+    const id_comb = sol.id_comb
+
+    const strState = `{"d1": ${d1}, "d2": ${d2}, "d3": ${d3}, "d4": ${d4}, "d5": ${d5}, "msg": "${message}", "code": "${clave}"}`
+    const query = `UPDATE royal_tablet SET comb='${strState}' WHERE table_id='${table_id}' AND id_comb='${id_comb}'`
+
+    console.log(query)
+
+    const client = await db.connect()
+    const result = await client.query(query);
+    client.release()
+    res.status(200).json(result)
 })
+
+/* LOGIN */
+
+app.get('/rtlogin', async (req, res) => {
+    const client = await db.connect();
+
+    console.log(req.body)
+    const { table_id, table_password } = req.body
+    console.log(table_id)
+    console.log(table_password)
+
+
+    const result = await client.query(`SELECT table_id, table_password FROM royal_tablet WHERE table_id='${table_id}' AND table_password='${table_password}'`);
+    client.release()
+
+    const state = result.rows[0]
+
+    if (result.rows.length != 0) {
+        res.status(200).json({
+            auth: true
+        })
+    } else {
+        res.status(400).json({
+            auth: false
+        })
+    }
+});
