@@ -132,7 +132,7 @@ app.post('/rtsol', async (req, res) => {
 
 /* LOGIN */
 
-app.get('/rtlogin', async (req, res) => {
+app.post('/rtlogin', async (req, res) => {
     const client = await db.connect();
 
     console.log(req.body)
