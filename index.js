@@ -31,32 +31,8 @@ app.listen(
     process.env.PORT,
     () => {
         console.log(`ALIVEEE on http://localhost:${process.env.PORT}`)
-        console.log(`host: ${process.env.POSTGRES_HOST}`)
-        console.log(`port: ${process.env.PORT}`)
-        console.log(`user: ${process.env.POSTGRES_USER}`)
-        console.log(`password: ${process.env.POSTGRES_PASSWORD}`)
-        console.log(`database: ${process.env.POSTGRES_DATABASE}`)
-        console.log(`connectionString: ${process.env.POSTGRES_URL}`)
     }
 )
-
-let digit1 = 1;
-let digit2 = 1;
-let digit3 = 1;
-let digit4 = 1;
-let digit5 = 1;
-
-/* app.get('/rtsol', async (req, res) => {
-    const client = await db.connect();
-
-    const result = await client.query("SELECT * FROM states WHERE id='rt'");
-    client.release()
-
-    const state = JSON.parse(result.rows[0].state)
-    console.log(state)
-
-    res.status(200).json(state)
-}); */
 
 app.get('/rtsol/:table_id', async (req, res) => {
     const { table_id } = req.params
@@ -70,35 +46,6 @@ app.get('/rtsol/:table_id', async (req, res) => {
 
     res.status(200).json(state)
 });
-
-/* app.post('/rtsol', async (req, res) => {
-    res.setHeader('Access-Control-Allow-Credentials', true)
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-      )
-    const { sol } = req.body;
-
-    const d1 = sol.digit1
-    const d2 = sol.digit2
-    const d3 = sol.digit3
-    const d4 = sol.digit4
-    const d5 = sol.digit5
-    const clave = sol.clave
-    const message = sol.message
-
-    const strState = `{"digit1": ${d1}, "digit2": ${d2}, "digit3": ${d3}, "digit4": ${d4}, "digit5": ${d5}, "clave": "${clave}", "message": "${message}"}`
-    const query = `UPDATE states SET state='${strState}' WHERE id='rt'`
-
-    console.log(query)
-
-    const client = await db.connect()
-    const result = await client.query(query);
-    client.release()
-    res.status(200).json(result)
-}) */
 
 app.post('/rtsol', async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true)
@@ -157,6 +104,9 @@ app.post('/rtlogin', async (req, res) => {
 
 app.post('/rtlogin-user', async (req, res) => {
     const client = await db.connect();
+
+    console.log("REQ COOKIES:")
+    console.log(req.cookies)
 
     const { table_name } = req.body
 
