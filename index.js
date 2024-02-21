@@ -41,10 +41,12 @@ app.get('/rtsol/:table_id', async (req, res) => {
     const result = await client.query(`SELECT comb FROM royal_tablet WHERE table_id='${table_id}'`);
     client.release()
 
-    const state = JSON.parse(result.rows[0].comb)
-    console.log(state)
+    const combs = []
+    result.rows.forEach((comb) => {
+        combs.push(comb.comb)
+    })
 
-    res.status(200).json(state)
+    res.status(200).json(combs)
 });
 
 app.post('/rtsol', async (req, res) => {
@@ -65,10 +67,10 @@ app.post('/rtsol', async (req, res) => {
     const clave = sol.code
     const message = sol.msg
     const table_id = sol.table_id
-    const id_comb = sol.id_comb
+    const comb_id = sol.comb_id
 
     const strState = `{"d1": ${d1}, "d2": ${d2}, "d3": ${d3}, "d4": ${d4}, "d5": ${d5}, "msg": "${message}", "code": "${clave}"}`
-    const query = `UPDATE royal_tablet SET comb='${strState}' WHERE table_id='${table_id}' AND id_comb='${id_comb}'`
+    const query = `UPDATE royal_tablet SET comb='${strState}' WHERE table_id='${table_id}' AND comb_id='${comb_id}'`
 
     console.log(query)
 
@@ -85,7 +87,7 @@ app.post('/rtlogin', async (req, res) => {
 
     const { table_name, table_password } = req.body
 
-    const result = await client.query(`SELECT table_id FROM royal_tablet WHERE table_name='${table_name}' AND table_password='${table_password}'`);
+    const result = await client.query(`SELECT table_id FROM tables WHERE table_name='${table_name}' AND table_password='${table_password}'`);
     const state = result.rows[0]
 
     if (result.rows.length != 0) {
@@ -110,14 +112,23 @@ app.post('/rtlogin-user', async (req, res) => {
 
     const { table_name } = req.body
 
-    const result = await client.query(`SELECT table_id, comb FROM royal_tablet WHERE table_name='${table_name}'`);
-    const state = result.rows[0]
+    const result = await client.query(`
+        SELECT
+            COMB
+        FROM royal_tablet rt, "tables" t 
+        WHERE rt.table_id = t.table_id AND 
+            t.table_name = '${table_name}'
+    `);
+
+    const combs = []
+    result.rows.forEach((comb) => {
+        combs.push(comb.comb)
+    })
 
     if (result.rows.length != 0) {
         res.status(200).json({
             auth: true,
-            comb: state.comb,
-            table_id: state.table_id
+            combs: combs
         })
     } else {
         res.status(400).json({
