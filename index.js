@@ -70,7 +70,7 @@ app.post('/rtsol', async (req, res) => {
     const comb_id = sol.comb_id
     const active = sol.active
 
-    const strState = `{"comb_id": "${comb_id}", "active": ${active} "d1": ${d1}, "d2": ${d2}, "d3": ${d3}, "d4": ${d4}, "d5": ${d5}, "msg": "${message}", "code": "${clave}"}`
+    const strState = `{"comb_id": "${comb_id}", "active": ${active}, "d1": ${d1}, "d2": ${d2}, "d3": ${d3}, "d4": ${d4}, "d5": ${d5}, "msg": "${message}", "code": "${clave}"}`
     const query = `UPDATE royal_tablet SET comb='${strState}' WHERE table_id='${table_id}' AND comb_id='${comb_id}'`
 
     console.log(query)
