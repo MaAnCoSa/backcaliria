@@ -81,6 +81,44 @@ app.post('/rtsol', async (req, res) => {
     res.status(200).json(result)
 })
 
+// NEW USER
+
+app.post('/newuser', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true)
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+      )
+    const { table_name, table_password } = req.body;
+
+    let query = `INSERT INTO tables(table_id, table_name, table_password) VALUES(uuid_generate_v4(), '${table_name}', '${table_password}')`;
+
+    const client = await db.connect();
+    const newTable = await client.query(query);
+
+    query = `SELECT table_id FROM tables WHERE table_name = '${table_name}'`;
+    const newTableId = await client.query(query);
+
+    let table_id = newTableId.rows[0].table_id;
+
+    const strComb1 = `{"comb_id": "Combination 1", "active": true, "d1": 1, "d2": 1, "d3": 1, "d4": 1, "d5": 1, "msg": "TEST MSG 1", "code": "TEST CODE 1"}`
+    query = `INSERT INTO royal_tablet(table_id, comb_id, comb, id) VALUES('${table_id}', 'Combination 1', '${strComb1}', uuid_generate_v4())`;
+    const queryComb1 = await client.query(query);
+
+    const strComb2 = `{"comb_id": "Combination 2", "active": false, "d1": 2, "d2": 2, "d3": 2, "d4": 2, "d5": 2, "msg": "TEST MSG 2", "code": "TEST CODE 2"}`
+    query = `INSERT INTO royal_tablet(table_id, comb_id, comb, id) VALUES('${table_id}', 'Combination 2', '${strComb2}', uuid_generate_v4())`;
+    const queryComb2 = await client.query(query);
+
+    const strComb3 = `{"comb_id": "Combination 3", "active": false, "d1": 3, "d2": 3, "d3": 3, "d4": 3, "d5": 3, "msg": "TEST MSG 3", "code": "TEST CODE 3"}`
+    query = `INSERT INTO royal_tablet(table_id, comb_id, comb, id) VALUES('${table_id}', 'Combination 3', '${strComb3}', uuid_generate_v4())`;
+    const queryComb3 = await client.query(query);
+
+    client.release()
+    res.status(200).json({newTable, newTableId})
+})
+
 /* LOGIN */
 
 app.post('/rtlogin', async (req, res) => {
